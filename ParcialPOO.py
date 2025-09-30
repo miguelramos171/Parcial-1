@@ -1,56 +1,74 @@
-#Miguel Ángel Ramos
-#Biblioteca universitaria
-
 class Libro:
-    def __init__(self, titulo, autor, categoria, cantidad):
-        self.titulo = titulo
-        self.autor = autor
-        self.categoria = categoria
-        self.disponible = True
-        self.cantidad = cantidad
+    def __init__(self, titulo, autor, categoria, isbn):
+        self._titulo = titulo
+        self._autor = autor
+        self._categoria = categoria
+        self._isbn = isbn
+        self._disponible = True
 
-    def prestar(self):
-        if self.disponible:
-            self.disponible = False
+    def prestar(self): self._disponible = False
+    def devolver(self): self._disponible = True
+    def disponible(self): return self._disponible
+    def isbn(self): return self._isbn
+    def info(self): return f"{self._titulo} ({self._categoria})"
 
-    def devolver(self):
-        self.disponible = True
-
-    def tomar_titulo(self):
-        return self.titulo
-    
-    def tomar_autor(self):
-        return self.autor
-    
-    def tomar_categoría(self):
-        return self.categoria
-
-    def confirmar_disponibilidad(self):
-        return self.disponible
-    
-    def confirmar_cantidad(self):
-        return self.cantidad
 
 class Usuario:
-    def __init__(self,nombre,libros_prestados):
-        self.nombre = nombre
-        self.libros_prestados = []
+    def __init__(self, nombre, id_u):
+        self._nombre = nombre
+        self._id = id_u
+        self._libros = []
 
-    def pedir_libro(self):
-        x=input("Ingrese el nombre del libro que quiere pedir")
+    def prestar(self, libro): self._libros.append(libro)
+    def id(self): return self._id
+    def libros(self): return self._libros
 
 
-        
-class Administrador(Libro, Usuario):
-    categorias_libros=["Ciencia Ficción", "Drama", "Infantil"]
-    def generar_variables(self):
-        self.libros = []
-        self.usuarios = []
+class Biblioteca:
+    def __init__(self):
+        self._libros = []
+        self._usuarios = []
+        self._categorias = ["Ciencia", "Literatura", "Ingeniería"]
 
-    def agregar_libro(self):
-         self.libros.append(Libro(titulo=input("Ingrese el título del libro"), autor=input("Ingrese el autor del libro"), categoria=input("Ingrese la categoría del libro") ))
+    def registrar_libro(self):
+        t = input("Título: ")
+        a = input("Autor: ")
+        c = input("Categoría: ")
+        i = input("ISBN: ")
+        if c not in self._categorias:
+            print("Categoría inválida.")
+            return
+        self._libros.append(Libro(t, a, c, i))
+        print("Libro registrado.")
 
-    def desplegar_menu(self):
-        print("Vienvenido a la biblioteca virtual MARS\nMarque 1 o 2 según su el perfil con el que va a ingresar\n\n" \
-        "1)Usuario\n2)administrador" )
-        input("Ingrese su nombre")
+    def registrar_usuario(self):
+        n = input("Nombre: ")
+        i = input("ID: ")
+        self._usuarios.append(Usuario(n, i))
+        print("Usuario registrado.")
+
+    def prestar_libro(self):
+        id_u = input("ID usuario: ")
+        isbn = input("ISBN libro: ")
+        usuario = next((u for u in self._usuarios if u.id() == id_u), None)
+        libro = next((l for l in self._libros if l.isbn() == isbn), None)
+        if usuario and libro and libro.disponible():
+            libro.prestar()
+            usuario.prestar(libro)
+            print("¡Libro prestado!")
+        else:
+            print("Error: usuario, libro o no disponible.")
+
+    def menu(self):
+        while True:
+            print("\n1. Registrar libro\n2. Registrar usuario\n3. Prestar libro\n4. Salir")
+            op = input("Opción: ")
+            if op == "1": self.registrar_libro()
+            elif op == "2": self.registrar_usuario()
+            elif op == "3": self.prestar_libro()
+            elif op == "4": break
+            else: print("Opción inválida.")
+
+
+# Ejecución
+Biblioteca().menu()
